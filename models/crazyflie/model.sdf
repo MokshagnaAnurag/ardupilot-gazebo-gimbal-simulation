@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+
+  <model name="crazyflie">
+    <pose>0 0 0.25 0 0 0</pose>
+    <static>false</static>
+
+    <!-- ================= BODY ================= -->
+    <link name="body">
+      <inertial>
+        <mass>0.025</mass>
+        <inertia>
+          <ixx>1.6572e-05</ixx>
+          <iyy>1.6656e-05</iyy>
+          <izz>2.9262e-05</izz>
+        </inertia>
+      </inertial>
+
+      <collision name="body_collision">
+        <geometry>
+          <box>
+            <size>0.10 0.10 0.03</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="body_visual">
+        <geometry>
+          <mesh>
+            <uri>model://crazyflie/meshes/crazyflie_body.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <sensor name="imu" type="imu"/>
+      <sensor name="gps" type="gps"/>
+      <sensor name="baro" type="altimeter"/>
+    </link>
+
+    <!-- ================= PROPELLERS ================= -->
+    <link name="m1_prop">
+      <pose>0.048 -0.048 0.021 0 0 0</pose>
+      <gravity>false</gravity>
+      <inertial><mass>0.0005</mass></inertial>
+      <visual name="m1_visual">
+        <geometry>
+          <mesh>
+            <uri>model://crazyflie/meshes/crazyflie_ccw_propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="m2_prop">
+      <pose>-0.048 -0.048 0.021 0 0 0</pose>
+      <gravity>false</gravity>
+      <inertial><mass>0.0005</mass></inertial>
+      <visual name="m2_visual">
+        <geometry>
+          <mesh>
+            <uri>model://crazyflie/meshes/crazyflie_cw_propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="m3_prop">
+      <pose>-0.048 0.048 0.021 0 0 0</pose>
+      <gravity>false</gravity>
+      <inertial><mass>0.0005</mass></inertial>
+      <visual name="m3_visual">
+        <geometry>
+          <mesh>
+            <uri>model://crazyflie/meshes/crazyflie_ccw_propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="m4_prop">
+      <pose>0.048 0.048 0.021 0 0 0</pose>
+      <gravity>false</gravity>
+      <inertial><mass>0.0005</mass></inertial>
+      <visual name="m4_visual">
+        <geometry>
+          <mesh>
+            <uri>model://crazyflie/meshes/crazyflie_cw_propeller.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- ================= MOTOR JOINTS ================= -->
+    <joint name="m1_joint" type="revolute">
+      <parent>body</parent>
+      <child>m1_prop</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <joint name="m2_joint" type="revolute">
+      <parent>body</parent>
+      <child>m2_prop</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <joint name="m3_joint" type="revolute">
+      <parent>body</parent>
+      <child>m3_prop</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <joint name="m4_joint" type="revolute">
+      <parent>body</parent>
+      <child>m4_prop</child>
+      <axis><xyz>0 0 1</xyz></axis>
+    </joint>
+
+    <!-- ================= GIMBAL BASE ================= -->
+    <link name="gimbal_base">
+      <pose>0.05 0 -0.03 0 0 0</pose>
+      <gravity>false</gravity>
+      <visual name="gimbal_base_visual">
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://gimbal_small_1d/meshes/base_main.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="gimbal_mount_joint" type="fixed">
+      <parent>body</parent>
+      <child>gimbal_base</child>
+    </joint>
+
+    <!-- ================= GIMBAL TILT + CAMERA ================= -->
+    <link name="gimbal_tilt">
+      <pose>0 0 -0.02 0 0 0</pose>
+      <gravity>false</gravity>
+
+      <visual name="gimbal_tilt_visual">
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://gimbal_small_1d/meshes/tilt.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <sensor name="gimbal_camera" type="camera">
+        <pose>0 0 0 -1.57 0 0</pose>
+
+        <camera>
+          <horizontal_fov>1.2</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+          </image>
+        </camera>
+
+        <always_on>true</always_on>
+        <update_rate>15</update_rate>
+        <visualize>true</visualize>
+
+        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <camera_name>gimbal_camera</camera_name>
+          <image_topic_name>image</image_topic_name>
+        </plugin>
+      </sensor>
+    </link>
+
+    <joint name="gimbal_tilt_joint" type="revolute">
+      <parent>gimbal_base</parent>
+      <child>gimbal_tilt</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.6</lower>
+          <upper>0.3</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- ================= ARDUPILOT ================= -->
+    <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <fdm_port_out>9003</fdm_port_out>
+
+      <imuName>imu</imuName>
+      <gpsName>gps</gpsName>
+      <baroName>baro</baroName>
+
+      <control channel="0"><jointName>m1_joint</jointName></control>
+      <control channel="1"><jointName>m2_joint</jointName></control>
+      <control channel="2"><jointName>m3_joint</jointName></control>
+      <control channel="3"><jointName>m4_joint</jointName></control>
+    </plugin>
+
+  </model>
+</sdf>

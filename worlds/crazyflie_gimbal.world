@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+
+  <world name="default">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://crazyflie</uri>
+      <name>crazyflie</name>
+    </include>
+
+    <include>
+      <uri>model://gimbal_small_1d</uri>
+      <name>gimbal_small_1d</name>
+    </include>
+
+    <!-- FIXED JOINT: DRONE ↔ GIMBAL -->
+    <joint name="gimbal_mount_joint" type="fixed">
+      <parent>crazyflie::crazyflie/body</parent>
+      <child>gimbal_small_1d::base_link</child>
+    </joint>
+
+  </world>
+</sdf>
